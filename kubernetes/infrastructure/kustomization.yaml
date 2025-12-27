@@ -12,3 +12,4 @@ resources:
   - prometheus
   - grafana
   - metrics-server
+  - kyverno
