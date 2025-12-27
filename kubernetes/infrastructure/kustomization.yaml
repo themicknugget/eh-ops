@@ -10,3 +10,4 @@ resources:
   - tailscale
   - cloudflare-tunnel
   - prometheus
+  - metrics-server
