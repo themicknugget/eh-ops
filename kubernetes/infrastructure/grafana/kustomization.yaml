@@ -1,0 +1,18 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: observability
+resources:
+  - admin-secret.sops.yaml
+  - helm-release.yaml
+  - http-route.yaml
+  - dashboards/cert-manager-dashboard.yaml
+  - dashboards/cilium-dashboards.yaml
+  - dashboards/cilium-envoy-dashboard.yaml
+  - dashboards/cloudflare-tunnel-dashboard.yaml
+  - dashboards/coredns-dashboard.yaml
+  - dashboards/flux-cluster-dashboard.yaml
+  - dashboards/flux-control-plane-dashboard.yaml
+  - dashboards/flux-podmonitor.yaml
+  - dashboards/kyverno-dashboard.yaml
+  - dashboards/node-exporter-dashboard.yaml
