@@ -7,3 +7,4 @@ resources:
   - gateway
   - storage
   - tailscale
+  - k8s-gateway
