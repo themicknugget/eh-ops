@@ -8,3 +8,4 @@ resources:
   - storage
   - tailscale
   - k8s-gateway
+  - cloudflare-tunnel
