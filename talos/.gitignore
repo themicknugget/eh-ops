@@ -1,0 +1,8 @@
+# Talos cluster configuration
+*.yaml
+!talconfig.yaml
+!talsecret.sops.yaml
+
+# Ignore cluster-specific generated configs
+clusterconfig/
+!clusterconfig/.gitignore

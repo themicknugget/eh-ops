@@ -1,0 +1,329 @@
+---
+clusterName: eh-ops
+talosVersion: v1.12.0
+kubernetesVersion: v1.35.0
+endpoint: https://127.0.0.1:7445
+domain: cluster.local
+
+additionalApiServerCertSans:
+  - home-cluster.local
+  - 192.168.1.50
+
+clusterPodNets:
+  - 10.244.0.0/16
+clusterSvcNets:
+  - 10.96.0.0/12
+
+cniConfig:
+  name: none
+
+nodes:
+  # mini1 - Control plane node
+  - hostname: mini1
+    ipAddress: 192.168.1.51
+    controlPlane: true
+    installDisk: /dev/disk/by-id/mmc-DF4064_0x988762ba
+    talosImageURL: factory.talos.dev/metal-installer-secureboot/ee827ee541fb06e742e6d183f4e3c1a62a2d63d945cbbd0b1e76da9221af9d27
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: 50:eb:f6:ef:4a:36
+        dhcp: false
+        addresses:
+          - 192.168.1.51/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.1.1
+    patches:
+      - |-
+        machine:
+          sysctls:
+            user.max_user_namespaces: "11255"
+
+  # mini2 - Control plane node
+  - hostname: mini2
+    ipAddress: 192.168.1.52
+    controlPlane: true
+    installDisk: /dev/disk/by-id/mmc-DF4064_0x3fb9371c
+    talosImageURL: factory.talos.dev/metal-installer-secureboot/ee827ee541fb06e742e6d183f4e3c1a62a2d63d945cbbd0b1e76da9221af9d27
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: 50:eb:f6:ef:49:81
+        dhcp: false
+        addresses:
+          - 192.168.1.52/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.1.1
+    patches:
+      - |-
+        machine:
+          sysctls:
+            user.max_user_namespaces: "11255"
+
+  # mini3 - Control plane node
+  - hostname: mini3
+    ipAddress: 192.168.1.53
+    controlPlane: true
+    installDisk: /dev/disk/by-id/mmc-DF4064_0x97bf371c
+    talosImageURL: factory.talos.dev/metal-installer-secureboot/ee827ee541fb06e742e6d183f4e3c1a62a2d63d945cbbd0b1e76da9221af9d27
+    patches:
+      - |-
+        machine:
+          sysctls:
+            user.max_user_namespaces: "11255"
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: 50:eb:f6:ef:49:84
+        dhcp: false
+        addresses:
+          - 192.168.1.53/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.1.1
+
+  # miniryzen - Worker node
+  - hostname: miniryzen
+    ipAddress: 192.168.1.55
+    controlPlane: false
+    installDisk: /dev/disk/by-id/nvme-SAMSUNG_MZVL81T0HELB-00BTW_S7HZNX0X457750
+    talosImageURL: factory.talos.dev/metal-installer-secureboot/9c1d1b442d73f96dcd04e81463eb20000ab014062d22e1b083e1773336bc1dd5
+    patches:
+      - |-
+        machine:
+          sysctls:
+            user.max_user_namespaces: "11255"
+            net.core.rmem_max: "134217728"
+            net.core.wmem_max: "134217728"
+            net.ipv4.tcp_rmem: "4096 87380 134217728"
+            net.ipv4.tcp_wmem: "4096 65536 134217728"
+            net.ipv4.tcp_congestion_control: "bbr"
+            net.core.default_qdisc: "fq"
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: 1c:83:41:32:d6:e6
+        dhcp: false
+        mtu: 9000
+        addresses:
+          - 192.168.1.55/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.1.1
+
+  # shadow - Worker node (large node for heavy workloads)
+  - hostname: shadow
+    ipAddress: 192.168.1.56
+    controlPlane: false
+    installDisk: /dev/disk/by-id/nvme-eui.e8238fa6bf530001001b448b4ab34307
+    talosImageURL: factory.talos.dev/metal-installer-secureboot/8d96872f9c21e99dc493b266fd586a5638f2af30a1aecf439aeaa6e9f8d9036b
+
+    patches:
+      - |-
+        machine:
+          sysctls:
+            user.max_user_namespaces: "11255"
+          nodeTaints:
+            workload-type: heavy:NoSchedule
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: 9c:bf:0d:00:f2:54
+        dhcp: false
+        addresses:
+          - 192.168.1.56/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.1.1
+
+  # mini4 - Worker node
+  - hostname: mini4
+    ipAddress: 192.168.1.57
+    controlPlane: false
+    installDisk: /dev/nvme0n1
+    talosImageURL: factory.talos.dev/metal-installer/4b3cd373a192c8469e859b7a0cfbed3ecc3577c4a2d346a37b0aeff9cd17cdb0
+    patches:
+      - |-
+        machine:
+          sysctls:
+            user.max_user_namespaces: "11255"
+            net.core.rmem_max: "134217728"
+            net.core.wmem_max: "134217728"
+            net.ipv4.tcp_rmem: "4096 87380 134217728"
+            net.ipv4.tcp_wmem: "4096 65536 134217728"
+            net.ipv4.tcp_congestion_control: "bbr"
+            net.core.default_qdisc: "fq"
+    networkInterfaces:
+      - interface: bond0
+        dhcp: false
+        mtu: 9000
+        bond:
+          mode: 802.3ad
+          lacpRate: fast
+          xmitHashPolicy: encap3+4
+          miimon: 100
+          deviceSelectors:
+            - hardwareAddr: 78:55:36:01:1d:1d
+            - hardwareAddr: 78:55:36:01:1d:1e
+        addresses:
+          - 192.168.1.57/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.1.1
+
+  # mini5 - Worker node
+  - hostname: mini5
+    ipAddress: 192.168.1.58
+    controlPlane: false
+    installDisk: /dev/nvme0n1
+    talosImageURL: factory.talos.dev/metal-installer/4b3cd373a192c8469e859b7a0cfbed3ecc3577c4a2d346a37b0aeff9cd17cdb0
+    patches:
+      - |-
+        machine:
+          sysctls:
+            user.max_user_namespaces: "11255"
+            net.core.rmem_max: "134217728"
+            net.core.wmem_max: "134217728"
+            net.ipv4.tcp_rmem: "4096 87380 134217728"
+            net.ipv4.tcp_wmem: "4096 65536 134217728"
+            net.ipv4.tcp_congestion_control: "bbr"
+            net.core.default_qdisc: "fq"
+    networkInterfaces:
+      - interface: bond0
+        dhcp: false
+        mtu: 9000
+        bond:
+          mode: 802.3ad
+          lacpRate: fast
+          xmitHashPolicy: encap3+4
+          miimon: 100
+          deviceSelectors:
+            - hardwareAddr: 78:55:36:01:1a:a7
+            - hardwareAddr: 78:55:36:01:1a:a8
+        addresses:
+          - 192.168.1.58/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.1.1
+
+  # mini6 - Worker node
+  - hostname: mini6
+    ipAddress: 192.168.1.59
+    controlPlane: false
+    installDisk: /dev/nvme0n1
+    talosImageURL: factory.talos.dev/metal-installer/4b3cd373a192c8469e859b7a0cfbed3ecc3577c4a2d346a37b0aeff9cd17cdb0
+    patches:
+      - |-
+        machine:
+          sysctls:
+            user.max_user_namespaces: "11255"
+            net.core.rmem_max: "134217728"
+            net.core.wmem_max: "134217728"
+            net.ipv4.tcp_rmem: "4096 87380 134217728"
+            net.ipv4.tcp_wmem: "4096 65536 134217728"
+            net.ipv4.tcp_congestion_control: "bbr"
+            net.core.default_qdisc: "fq"
+    networkInterfaces:
+      - interface: bond0
+        dhcp: false
+        mtu: 9000
+        bond:
+          mode: 802.3ad
+          lacpRate: fast
+          xmitHashPolicy: encap3+4
+          miimon: 100
+          deviceSelectors:
+            - hardwareAddr: 78:55:36:01:1b:65
+            - hardwareAddr: 78:55:36:01:1b:66
+        addresses:
+          - 192.168.1.59/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.1.1
+
+
+patches:
+  - |-
+    machine:
+      kubelet:
+        extraArgs:
+          feature-gates: UserNamespacesSupport=true
+  - |-
+    machine:
+      registries:
+        mirrors:
+          docker.io:
+            endpoints:
+              - https://localhost:5001
+              - https://registry-1.docker.io
+            overridePath: true
+          ghcr.io:
+            endpoints:
+              - https://localhost:5001
+              - https://ghcr.io
+            overridePath: true
+          registry.k8s.io:
+            endpoints:
+              - https://localhost:5001
+              - https://registry.k8s.io
+            overridePath: true
+          quay.io:
+            endpoints:
+              - https://localhost:5001
+              - https://quay.io
+            overridePath: true
+        config:
+          localhost:5001:
+            tls:
+              insecureSkipVerify: true
+  - |-
+    machine:
+      files:
+        - content: |
+            [plugins."io.containerd.grpc.v1.cri"]
+              disable_snapshot_annotations = false
+              discard_unpacked_layers = false
+          path: /var/etc/cri/conf.d/spegel.toml
+          op: create
+  - |-
+    machine:
+      sysctls:
+        # Accept gratuitous ARP for VIP failover
+        net.ipv4.conf.all.arp_accept: "1"
+        net.ipv4.conf.default.arp_accept: "1"
+        net.ipv4.conf.all.drop_gratuitous_arp: "0"
+        net.ipv4.conf.default.drop_gratuitous_arp: "0"
+        # Neighbor table sizing
+        net.ipv4.neigh.default.gc_thresh3: "2048"
+        # Network queue tuning
+        net.core.netdev_max_backlog: "10000"
+        net.core.netdev_budget: "600"
+        # BPF JIT for Cilium
+        net.core.bpf_jit_enable: "1"
+        net.core.bpf_jit_harden: "0"
+        net.core.bpf_jit_limit: "1000000000"
+
+controlPlane:
+  patches:
+    - |-
+      cluster:
+        extraManifests:
+          - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
+    - |-
+      machine:
+        kubelet:
+          extraArgs:
+            feature-gates: GracefulNodeShutdown=true
+    - |-
+      cluster:
+        etcd:
+          extraArgs:
+            auto-compaction-mode: periodic
+            auto-compaction-retention: "5m"
+            heartbeat-interval: "250"
+            election-timeout: "2500"
+            quota-backend-bytes: "2147483648"
+            max-snapshots: "3"
+            max-wals: "3"
+    - |-
+      cluster:
+        apiServer:
+          extraArgs:
+            feature-gates: UserNamespacesSupport=true
