@@ -15,6 +15,10 @@ autoDirectNodeRoutes: true
 # Enable kube-proxy replacement
 kubeProxyReplacement: true
 
+# Gateway API support
+gatewayAPI:
+  enabled: true
+
 # WireGuard encryption
 encryption:
   enabled: true
@@ -102,4 +106,8 @@ tolerations:
   effect: NoSchedule
 - key: node.kubernetes.io/not-ready
   operator: Exists
+  effect: NoSchedule
+- key: workload-type
+  operator: Equal
+  value: heavy
   effect: NoSchedule
