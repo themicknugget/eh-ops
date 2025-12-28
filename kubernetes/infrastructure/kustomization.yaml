@@ -13,3 +13,4 @@ resources:
   - grafana
   - metrics-server
   - kyverno
+  - spegel
