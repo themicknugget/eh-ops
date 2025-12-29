@@ -15,3 +15,4 @@ resources:
   - kyverno
   - spegel
   - amd-gpu
+  - llama-cpp

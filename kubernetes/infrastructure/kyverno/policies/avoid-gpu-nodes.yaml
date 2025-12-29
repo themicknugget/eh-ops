@@ -37,6 +37,8 @@ spec:
                 - cert-manager
                 - monitoring
                 - cilium-system
+                - storage
+                - llama-cpp
           # Exclude DaemonSet pods (they need to run everywhere)
           - resources:
               kinds:
